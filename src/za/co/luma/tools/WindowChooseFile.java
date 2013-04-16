@@ -1,5 +1,7 @@
 package za.co.luma.tools;
 
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,20 +13,18 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 
 public class WindowChooseFile extends JFrame{
 
 	private static WindowChooseFile instance;
 
-	public static WindowChooseFile getInstance(ImageCompressor ic, ProgressBar pb){
-		if (instance == null)
-		{
-			instance = new WindowChooseFile(ic, pb);
+	public static WindowChooseFile getInstance(ImageCompressor ic){
+		if (instance == null){
+			instance = new WindowChooseFile(ic);
 		}
 
 		return instance; 
@@ -33,13 +33,22 @@ public class WindowChooseFile extends JFrame{
 	//====================================================== fields
 	JTextField   _fileNameTF  = new JTextField(50);
 	JFileChooser _fileChooser = new JFileChooser();
+	JFileChooser _destinationFolderChooser = new JFileChooser();
+	JTextField   _destinationFolderTF  = new JTextField(50);
 	ImageCompressor imageCompressor;
-	ProgressBar pBar;
+	private JPanel content;
+	private JPanel content2;
+	private JPanel content3;
 	private String pathFile = "";
+	private String destinationFolder = "";
+	private JProgressBar finished = new JProgressBar(0,1);
+	
+	public void setFinished(JProgressBar finished) {
+		this.finished = finished;
+	}
 
-	//getPBar
-	public ProgressBar getPBar(){
-		return this.pBar;
+	public JProgressBar getFinished() {
+		return finished;
 	}
 
 	//getPathFile
@@ -47,32 +56,51 @@ public class WindowChooseFile extends JFrame{
 		return this.pathFile;
 	}
 
+	//getContent
+	public JPanel getContent(){
+		return this.content;
+	}
 
 	//================================================= constructor
-	WindowChooseFile(ImageCompressor ic, ProgressBar pb) {
+	WindowChooseFile(ImageCompressor ic) {
 		this.pathFile = "";
-		this.pBar = pb;
 		this.imageCompressor = ic;
+		//finished progress bar
+		finished.setValue(1);
+		finished.setForeground(new Color(255, 0, 0));
+		finished.setPreferredSize(new Dimension(35, 28));
+		_destinationFolderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		
 		//... Create / set component characteristics.
 		_fileNameTF.setEditable(false);
+		_destinationFolderTF.setEditable(false);
 
 		//... Add listeners
 
 		//... Create content pane, layout components
-		JPanel content = new JPanel();
+		this.content = new JPanel();
 		JButton button_ok = new JButton("OK");
 		JMenuItem openItem = new JMenuItem("Open");
+		JMenuItem openDestinationFolder = new JMenuItem("Destination Folder");
 
 		content.setLayout(new FlowLayout());
 		content.add(new JLabel("File:"));
 		content.add(openItem);
 		content.add(_fileNameTF);
+		/****/
+		content.setLayout(new FlowLayout());
+		content.add(openDestinationFolder);
+		content.add(_destinationFolderTF);
+		/****/
 		content.add(button_ok);
-		content.add(pBar.getPbar());
-
+		content.add(finished);
+		/***/
+		
 		openItem.addActionListener(new OpenAction());
+		openDestinationFolder.addActionListener(new OpenDestinationFAction());
 		button_ok.addActionListener(new OkAction());
 
+		
 
 		//... Set window characteristics
 		this.setContentPane(content);
@@ -82,7 +110,22 @@ public class WindowChooseFile extends JFrame{
 		this.setLocationRelativeTo(null); // Center window.
 	}
 
-
+	////////////////////////////////////////////////////// OpenDestinationFAction
+	
+	class OpenDestinationFAction implements ActionListener {
+		public void actionPerformed(ActionEvent ae) {
+			//... Open a file dialog.
+			int retval = _destinationFolderChooser.showOpenDialog(WindowChooseFile.this);
+			if (retval == JFileChooser.APPROVE_OPTION) {
+				//... The user selected a file, get it, use it.
+				File file = _destinationFolderChooser.getSelectedFile();
+				//... Update user interface.
+				_destinationFolderTF.setText(file.getAbsolutePath());
+				destinationFolder = file.getAbsolutePath();
+			}
+		}
+	}
+		
 	///////////////////////////////////////////////////// OpenAction
 	class OpenAction implements ActionListener {
 		public void actionPerformed(ActionEvent ae) {
@@ -104,7 +147,10 @@ public class WindowChooseFile extends JFrame{
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			imageCompressor.launchCompression(pathFile, pBar);
+			imageCompressor.setPathOfDestDir(destinationFolder);
+			Color green = new Color(0, 255, 0);
+			imageCompressor.launchCompression(pathFile);
+			finished.setForeground(green);
 		}
 
 		@Override

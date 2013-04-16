@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.swing.SwingUtilities;
 
 import za.co.iocom.image.ColorUtil;
 import za.co.iocom.math.MathUtil;
@@ -17,17 +16,39 @@ import za.co.luma.geom.Vector3DDouble;
 /**
 	Illustrates the use of QuadTrees for images.
  */
-public class ImageCompressor
-{
-	enum Channel
-	{
+public class ImageCompressor{
+	enum Channel{
 		RED,
 		GREEN,
 		BLUE
 	}
 
-	static Color[][] makeColorArray(BufferedImage image)
-	{
+	/****/
+	private BufferedImage image;
+	private static String pathOfDestDir;
+
+	public String getPathOfDestDir(){
+		return pathOfDestDir;
+	}
+
+	public void setPathOfDestDir(String podd){
+		if(podd.equals(""))
+			this.pathOfDestDir = "";
+		else
+			this.pathOfDestDir = podd+"/";
+	}
+
+
+	public void setBufferedImage(BufferedImage im){
+		this.image = im;
+	}
+
+	public BufferedImage getBufferedImage(){
+		return this.image;
+	}
+	/****/
+
+	static Color[][] makeColorArray(BufferedImage image){
 		int width = image.getWidth();
 		int height = image.getHeight();
 
@@ -168,19 +189,19 @@ public class ImageCompressor
 	}
 
 	/***************************/
-	public void launchCompression(String imagePath, ProgressBar pb){
+	public void launchCompression(String imagePath){
 
 		try{
 			/** Original file:  "quadtree_original.png" **/
 			BufferedImage image = ImageIO.read(new File(imagePath));
 
-			normalQuadtreeCompress(image, pb);			
+			normalQuadtreeCompress(image);			
 			//channalSeparatedQuadtreeCompress(image);
 			//gradientQuadtreeCompress(image);
 		}
 		catch (IOException e)
 		{
-			// TODO Auto-generated catch block
+			System.out.println("ERRORE!  IMPOSSIBILE LEGGERE L'IMMAGINE E DECOMPORLA!");
 			e.printStackTrace();
 		}		
 
@@ -191,15 +212,14 @@ public class ImageCompressor
 
 	public static void main(String[] args){
 		ImageCompressor ic = new ImageCompressor();
-		ProgressBar pb = new ProgressBar();
-		
-		WindowChooseFile window = WindowChooseFile.getInstance(ic, pb);
+
+		WindowChooseFile window = WindowChooseFile.getInstance(ic);
 		window.setVisible(true);
 	}
 
 
-	private static void normalQuadtreeCompress(BufferedImage image, final ProgressBar pb) throws IOException{
-		
+	private static void normalQuadtreeCompress(BufferedImage image) throws IOException{
+
 		Color[][] colors = makeColorArray(image);	
 
 		int width = image.getWidth();
@@ -214,23 +234,15 @@ public class ImageCompressor
 				for(int j = 0; j < height; j++){
 					outImage.setRGB(i, j, quadTree.get(i, j).getRGB());								
 				}
-			} 
-			
-			SwingUtilities.invokeLater(new Runnable() {
-		          public void run() {
-		             pb.updateBar((k*100)/19);
-		            }
-		          });
-			
-			WindowChooseFile.getInstance(null, null).invalidate();
-			WindowChooseFile.getInstance(null, null).repaint();
-			WindowChooseFile.getInstance(null, null).validate();
-			ImageIO.write(outImage, "png", new File("normal_quad" + k + ".png"));
+			}
+
+			ImageIO.write(outImage, "png", new File(pathOfDestDir+"normal_quad" + k + ".png"));
 		}
+
 	}
 
-	private static void channalSeparatedQuadtreeCompress(BufferedImage image) throws IOException
-	{
+	private static void channalSeparatedQuadtreeCompress(BufferedImage image) throws IOException{
+
 		Double[][] red = makeChannelArray(image, Channel.RED);
 		Double[][] green = makeChannelArray(image, Channel.GREEN);
 		Double[][] blue = makeChannelArray(image, Channel.BLUE);
@@ -261,6 +273,8 @@ public class ImageCompressor
 
 			ImageIO.write(outImage, "png", new File("channel_separated_quad" + k + ".png"));				
 		}
+
+
 	}
 
 	private static void gradientQuadtreeCompress(BufferedImage image) throws IOException
@@ -455,4 +469,6 @@ public class ImageCompressor
 			return redSum / (pixelCount * 255 * 255) + greenSum / (pixelCount * 255 * 255) + blueSum / (pixelCount * 255 * 255);
 		}		
 	}
+
+
 }
