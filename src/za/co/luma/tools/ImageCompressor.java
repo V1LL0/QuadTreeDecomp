@@ -33,9 +33,9 @@ public class ImageCompressor{
 
 	public void setPathOfDestDir(String podd){
 		if(podd.equals(""))
-			this.pathOfDestDir = "";
+			ImageCompressor.pathOfDestDir = "";
 		else
-			this.pathOfDestDir = podd+"/";
+			ImageCompressor.pathOfDestDir = podd+"/";
 	}
 
 
