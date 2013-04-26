@@ -190,7 +190,7 @@ public class ImageCompressor{
 
 	/***************************/
 	public void launchCompression(String imagePath){
-
+		//TODO DICOM IMAGES
 		try{
 			/** Original file:  "quadtree_original.png" **/
 			BufferedImage image = ImageIO.read(new File(imagePath));

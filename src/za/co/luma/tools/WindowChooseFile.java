@@ -37,8 +37,6 @@ public class WindowChooseFile extends JFrame{
 	JTextField   _destinationFolderTF  = new JTextField(50);
 	ImageCompressor imageCompressor;
 	private JPanel content;
-	private JPanel content2;
-	private JPanel content3;
 	private String pathFile = "";
 	private String destinationFolder = "";
 	private JProgressBar finished = new JProgressBar(0,1);
@@ -68,7 +66,7 @@ public class WindowChooseFile extends JFrame{
 		//finished progress bar
 		finished.setValue(1);
 		finished.setForeground(new Color(255, 0, 0));
-		finished.setPreferredSize(new Dimension(35, 28));
+		finished.setPreferredSize(new Dimension(800, 15));
 		_destinationFolderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		
 		//... Create / set component characteristics.
@@ -106,6 +104,7 @@ public class WindowChooseFile extends JFrame{
 		this.setContentPane(content);
 		this.setTitle("Choose your image");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setPreferredSize(new Dimension(825,110));
 		this.pack();                      // Layout components.
 		this.setLocationRelativeTo(null); // Center window.
 	}
